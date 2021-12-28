@@ -49,6 +49,8 @@ new_deck = genanki.Deck(
 
 colnames=['Q','A']
 df = pd.read_csv(input_file, index_col=False, names=colnames)
+
+print('Card Example:')
 print(df.iloc[0])
 
 for i in df.index:
@@ -57,7 +59,5 @@ for i in df.index:
     model=my_model,
     fields=[q,a])
     new_deck.add_note(new_note)
-    if __debug__:
-      pass#print(q,'\n',a,'\n')
-    else: pass
+
 genanki.Package(new_deck).write_to_file(output_file, None)
