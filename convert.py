@@ -1,9 +1,6 @@
 import os
-
 from cached_property import cached_property
 from numpy import NaN
-#os.system('/bin/bash --rcfile venv/bin/activate')
-os.system('source venv/bin/activate')
 import genanki
 import sys
 from genanki import deck, model, builtin_models
