@@ -1,16 +1,8 @@
 import os
-<<<<<<< HEAD
 import sys
 import argparse
 
 from numpy import NaN
-=======
-from cached_property import cached_property
-from numpy import NaN
-import genanki
-import sys
-from genanki import deck, model, builtin_models
->>>>>>> c08250b9d96f10ac0afa941105af367d215b74b0
 import pandas as pd
 import re
 
