@@ -1,10 +1,14 @@
 import os
+
+from cached_property import cached_property
+from numpy import NaN
 #os.system('/bin/bash --rcfile venv/bin/activate')
 os.system('source venv/bin/activate')
 import genanki
 import sys
-from genanki import deck
+from genanki import deck, model, builtin_models
 import pandas as pd
+import re
 
 program_name = sys.argv[0]
 arguments = sys.argv[1:]
@@ -28,36 +32,42 @@ print(input_file)
 
 output_file = str(os.path.join(output_path, filename+'.apkg'))
 
-my_model = genanki.Model(
-  1607392319,
-  'Simple Model',
-  fields=[
-    {'name': 'Question'},
-    {'name': 'Answer'},
-  ],
-  templates=[
-    {
-      'name': 'Card 1',
-      'qfmt': '{{Question}}',
-      'afmt': '{{FrontSide}}<hr id="answer">{{Answer}}',
-    },
-  ])
-
 new_deck = genanki.Deck(
   2059400110,
   deck_name)
 
-colnames=['Q','A']
+
+## INPUT
+
+colnames=['Q','A','R']
 df = pd.read_csv(input_file, index_col=False, names=colnames)
 
 print('Card Example:')
 print(df.iloc[0])
 
 for i in df.index:
-    q,a = str(df['Q'][i]), str(df['A'][i])
+    q,a,r = str(df['Q'][i]), str(df['A'][i]), str(df['R'][i])
+    if a == 'nan':
+      model=builtin_models.CLOZE_MODEL
+      fields=[q]
+      print(type(model))
+      print(a,'cloze')
+    elif r == True:
+        model=builtin_models.BASIC_AND_REVERSED_CARD_MODEL
+        fields=[q,a]
+        print(type(model))
+        print(a,'basic_and_reversed')
+    else:
+        model=builtin_models.BASIC_MODEL
+        fields=[q,a]
+        print(type(model))
+        print(a,'basic')
+      
     new_note = genanki.Note(
-    model=my_model,
-    fields=[q,a])
+    model=model,
+    fields=fields)
     new_deck.add_note(new_note)
 
 genanki.Package(new_deck).write_to_file(output_file, None)
+
+print('\nSUCCESS!')
