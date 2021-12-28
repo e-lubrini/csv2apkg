@@ -1,2 +1,4 @@
-q {{c1::a}},,
-q,a,1
+test question, clever answer,
+incomplete sentence {{c1::is now complete}},,
+term,definition,1
+test question, clever answer,0

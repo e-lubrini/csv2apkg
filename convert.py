@@ -1,73 +1,81 @@
 import os
-
-from cached_property import cached_property
-from numpy import NaN
-#os.system('/bin/bash --rcfile venv/bin/activate')
-os.system('source venv/bin/activate')
-import genanki
 import sys
-from genanki import deck, model, builtin_models
+import argparse
+
+from numpy import NaN
 import pandas as pd
 import re
 
-program_name = sys.argv[0]
-arguments = sys.argv[1:]
-filename=arguments[0]
-# optional deck name (if none, filename is used)
-deck_name=arguments[-1]
+import genanki
+from genanki import deck, model, builtin_models
+from pandas.core.frame import DataFrame
 
-## TODO add argument convert all
+parser = argparse.ArgumentParser(description='convert a CSV to Anki flashcards')
+parser.add_argument('--gui', action='store_true', default=False,
+                    help='whether to open a gui to select the file')
+parser.add_argument('file', metavar='F', type=str, nargs='?', default='test',
+                    help='the path of the file to be converted')
+parser.add_argument('deckname', metavar='N', type=str, nargs='?', default='new_deck',
+                    help='the name of the flashcard deck')
 
-input_path = os.path.join('data','input')
-output_path = os.path.join('data','output')
-try: 
-    os.mkdir(output_path) 
-except OSError as error: 
-    pass  
+args = parser.parse_args()
 
-input_file = os.path.join(input_path,filename+'.csv')
-if not os.path.isfile(input_file):
-  input_file = os.path.join(input_path,'Anki - '+filename+'.csv')
-print(input_file)
+if args.gui == True:
+  from tkinter import Tk 
+  from tkinter.filedialog import askopenfilename
 
-output_file = str(os.path.join(output_path, filename+'.apkg'))
+  Tk().withdraw()
+  filepath = askopenfilename()
+  input_file = os.path.join(filepath)
+  output_file = str(os.path.join(filepath[:-4]+'.apkg'))
+else:
+  input_path = os.path.join('data','input')
+  output_path = os.path.join('data','output')
+  try: os.mkdir(output_path) 
+  except OSError as error: pass  
 
-new_deck = genanki.Deck(
-  2059400110,
-  deck_name)
+  filename = args.file
 
+  input_file = os.path.join(input_path,filename+'.csv')
+  output_file = str(os.path.join(output_path, filename+'.apkg'))
 
-## INPUT
+## Load file
+print('File:', input_file)
 
 colnames=['Q','A','R']
 df = pd.read_csv(input_file, index_col=False, names=colnames)
 
-print('Card Example:')
-print(df.iloc[0])
+## Create deck
+deckname = args.deckname
+new_deck = genanki.Deck(
+  2059400110,
+  deckname)
 
+print('Deck:', deckname)
+
+## Create cards
 for i in df.index:
-    q,a,r = str(df['Q'][i]), str(df['A'][i]), str(df['R'][i])
+    q,a,r = str(df['Q'][i]), str(df['A'][i]), bool(df['R'][i])
     if a == 'nan':
       model=builtin_models.CLOZE_MODEL
       fields=[q]
-      print(type(model))
-      print(a,'cloze')
     elif r == True:
         model=builtin_models.BASIC_AND_REVERSED_CARD_MODEL
         fields=[q,a]
-        print(type(model))
-        print(a,'basic_and_reversed')
     else:
         model=builtin_models.BASIC_MODEL
         fields=[q,a]
-        print(type(model))
-        print(a,'basic')
       
     new_note = genanki.Note(
     model=model,
     fields=fields)
     new_deck.add_note(new_note)
 
+print('-----Card Example:-----')
+print(DataFrame({'field':['Front:','Back:','Reverse:','Type:'], 'value':[q,a,r,model.name]}).to_string(index=False,header=False))
+print('-----------------------')
+
+## Write file
 genanki.Package(new_deck).write_to_file(output_file, None)
 
-print('\nSUCCESS!')
+print('Conversion completed!')
