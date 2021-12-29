@@ -1,14 +1,12 @@
 import os
-import sys
 import argparse
 
-from numpy import NaN
 import pandas as pd
+from pandas.core.frame import DataFrame
 import re
 
 import genanki
-from genanki import deck, model, builtin_models
-from pandas.core.frame import DataFrame
+from genanki import builtin_models # standard models proposed by genanki
 
 parser = argparse.ArgumentParser(description='convert a CSV to Anki flashcards')
 parser.add_argument('--gui', action='store_true', default=False,
