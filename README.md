@@ -1,5 +1,6 @@
 <h1 align="center">csv2apkg</h1> 
-Converting CSV files into Anki flashcards.
+<h3 align="center">Converting CSV files into Anki flashcards.</h3> 
+
 
 <h2>Installation</h2>
 ```
